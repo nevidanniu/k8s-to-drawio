@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault-aware-app
+  namespace: default
+  labels:
+    app: vault-aware-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vault-aware-app
+  template:
+    metadata:
+      labels:
+        app: vault-aware-app
+      annotations:
+        # Bank-Vaults annotations for secret injection
+        vault.security.banzaicloud.io/vault-addr: "https://vault.vault:8200"
+        vault.security.banzaicloud.io/vault-role: "myapp"
+        vault.security.banzaicloud.io/vault-path: "kubernetes"
+        vault.security.banzaicloud.io/vault-skip-verify: "false"
+        vault.security.banzaicloud.io/vault-tls-secret: "vault-tls-secret"
+        vault.security.banzaicloud.io/vault-serviceaccount: "vault-auth-sa"
+        vault.security.banzaicloud.io/token-auth-mount: "vault-token:token"
+        vault.security.banzaicloud.io/vault-env-from-path: "secret/myapp/config"
+        vault.security.banzaicloud.io/vault-auth-method: "kubernetes"
+        vault.security.banzaicloud.io/vault-namespace: "myapp"
+        vault.security.banzaicloud.io/mutate: ""
+        vault.security.banzaicloud.io/enable-json-log: "true"
+        vault.security.banzaicloud.io/vault-env-daemon: "false"
+    spec:
+      serviceAccountName: vault-auth-sa
+      containers:
+      - name: app
+        image: nginx:1.20
+        ports:
+        - containerPort: 80
+        env:
+        - name: VAULT_SECRET
+          value: "vault:secret/myapp/config#password"
+        - name: DATABASE_URL
+          value: "vault:secret/myapp/config#database_url"
+        - name: API_KEY
+          value: "vault:secret/myapp/config#api_key"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: another-vault-app
+  namespace: default
+  labels:
+    app: another-vault-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: another-vault-app
+  template:
+    metadata:
+      labels:
+        app: another-vault-app
+      annotations:
+        # Different Bank-Vaults configuration
+        vault.security.banzaicloud.io/vault-addr: "https://vault.vault:8200"
+        vault.security.banzaicloud.io/vault-role: "otherapp"
+        vault.security.banzaicloud.io/vault-tls-secret: "vault-ca-cert"
+        vault.security.banzaicloud.io/vault-serviceaccount: "another-vault-sa"
+        vault.security.banzaicloud.io/vault-env-from-path: "secret/myapp/config2"
+        vault.security.banzaicloud.io/vault-auth-method: "jwt"
+    spec:
+      serviceAccountName: another-vault-sa
+      containers:
+      - name: app
+        image: alpine:3.16
+        command: ["/bin/sh", "-c", "sleep 3600"]
+        env:
+        - name: SECRET_VALUE
+          value: "vault:secret/otherapp#value"

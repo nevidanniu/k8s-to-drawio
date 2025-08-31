@@ -1,0 +1,29 @@
+# Binaries
+k8s-to-drawio
+k8s-to-drawio.exe
+
+# Go build cache
+.cache/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+*.test
+coverage.out
+
+# Temporary files
+*.tmp
+*.log
+
+# Draw.io output files (optional, depending on project needs)
+*.drawio
+*.xml
