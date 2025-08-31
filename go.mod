@@ -4,7 +4,6 @@ go 1.23
 
 require (
 	github.com/spf13/cobra v1.7.0
-	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/apimachinery v0.28.0
 	sigs.k8s.io/kustomize/api v0.14.0
 	sigs.k8s.io/kustomize/kyaml v0.14.3
@@ -12,6 +11,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	gopkg.in/yaml.v3 v3.0.1 //indirect
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
 	github.com/go-errors/errors v1.4.2 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
